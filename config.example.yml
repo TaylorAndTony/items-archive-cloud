@@ -1,0 +1,6 @@
+csv_file: ../../something.csv
+# csv_file: ./test.csv
+password: '123'
+private:
+  - 不希望出现在公开列表中的关键词1
+  - 关键词2

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物品归档解密工具</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="./static/tailwind-3.4.17.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- <link href="./static/font-awesome.min.css" rel="stylesheet"> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script> -->
+    <script src="./static/crypto-js.min.js"></script>
+    <script src="./static/vue.min.js"></script>
+    <script src="./static/papaparse.min.js"></script>
+
+    <script src="./static/data.js"></script>
+
+</head>
+
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+    <div id="app">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 md:p-8">
+
+            <div class="space-y-4">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">加密密码</label>
+                    <input v-model="password" type="password" id="password"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="输入加密时使用的密码">
+                </div>
+
+
+                <button id="decryptBtn"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-200"
+                    @click="decrypt">
+                    <i class="fa fa-key mr-1"></i>解密
+                </button>
+
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">搜索</label>
+                    <input v-model="search" type="text" id="search"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="搜索内容">
+                </div>
+
+                <div id="error" class="mt-4" v-if="errorMessage">
+                    <div class="p-3 bg-red-50 rounded-md border border-red-200 text-red-600 text-sm">
+                        <i class="fa fa-exclamation-circle mr-1"></i>
+                        <span id="errorMessage">{{ errorMessage }}</span>
+                    </div>
+                </div>
+
+                <div id="warn" class="mt-4" v-if="warnMessage">
+                    <div class="p-3 bg-yellow-50 rounded-md border border-yellow-200 tex-yellow-600 text-sm">
+                        <i class="fa fa-exclamation-circle mr-1"></i>
+                        <span id="warnMessage">{{ warnMessage }}</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="mx-auto max-w-screen-xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <div v-for="item in items" :key="item.ID" class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                    <div class="text-xl font-bold">{{ item.名称 }}</div>
+                    <div class="text-blue-600 font-bold">{{ item.位置 }}</div>
+                    <div>{{ item.标签 }}</div>
+                    <div class="text-blue-500 hover:text-blue-600">{{ item.备注 }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 解密函数
+        function decrypt(encryptedText, password) {
+            // 解码base64
+            const combined = CryptoJS.enc.Base64.parse(encryptedText);
+            const combinedBytes = combined.toString(CryptoJS.enc.Latin1);
+
+            // 提取salt(前16字节)、iv(接下来16字节)和密文
+            const salt = combinedBytes.substr(0, 16);
+            const iv = combinedBytes.substr(16, 16);
+            const ciphertext = combinedBytes.substr(32);
+
+            // 处理密码：与Python端相同的方式生成密钥
+            const saltHex = CryptoJS.enc.Latin1.parse(salt).toString(CryptoJS.enc.Hex);
+            const key = CryptoJS.SHA256(password + saltHex);
+
+            // 解密
+            const decrypted = CryptoJS.AES.decrypt(
+                { ciphertext: CryptoJS.enc.Latin1.parse(ciphertext) },
+                key,
+                {
+                    iv: CryptoJS.enc.Latin1.parse(iv),
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                }
+            );
+
+            return decrypted.toString(CryptoJS.enc.Utf8);
+        }
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                password: '',
+                errorMessage: '',
+                warnMessage: '',
+                items: [],
+                search: '',
+                encryptedTest: '',
+            },
+            methods: {
+                decrypt() {
+                    this.errorMessage = '';
+                    this.items = [];
+                    this.encryptedTest = '';
+                    const password = this.password;
+                    const encryptedText = window.data;
+                    var decryptedText = "";
+                    try {
+                        decryptedText = decrypt(encryptedText, password);
+                    } catch (e) {
+                        this.errorMessage = e.message;
+                        return;
+                    }
+                    const parsed = Papa.parse(decryptedText, {
+                        header: true,
+                        skipEmptyLines: true
+                    });
+                    if (parsed.errors.length > 0) {
+                        this.errorMessage = '数据解析失败: '
+                            + parsed.errors[0].message
+                            + '。请检查密码是否正确。';
+                        return;
+                    }
+                    console.log(parsed.data);
+                    window.parsedData = parsed.data;
+                    this.showAllData();
+                },
+                doSearch(text) {
+                    this.items = window.parsedData.filter(item => {
+                        return item.名称.includes(text) || item.位置.includes(text) || item.标签.includes(text) || item.备注.includes(text);
+                    });
+                },
+                showAllData() {
+                    if (window.parsedData.length > 100) {
+                        this.items = window.parsedData.slice(0, 100);
+                        this.warnMessage = '数据过多，只显示前100条。';
+                    } else {
+                        this.items = window.parsedData;
+                        this.warnMessage = '';
+                    }
+                }
+            },
+            watch: {
+                search: function (newVal, oldVal) {
+                    if (newVal.length > 0) {
+                        this.doSearch(newVal);
+                    } else {
+                        this.showAllData();
+                    }
+                }
+            },
+            mounted() {
+                if (!window.data) {
+                    this.errorMessage = '数据加载失败，data 变量不可用，请检查网络';
+                    return;
+                }
+            },
+        });
+    </script>
+</body>
+
+</html>
