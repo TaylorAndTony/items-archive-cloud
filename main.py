@@ -1,6 +1,8 @@
+import datetime
 import lib
 import yaml
 from pathlib import Path
+import os
 
 from rich.console import Console
 
@@ -48,5 +50,18 @@ def write_file():
     console.print(f"Encrypted data written to {csv_file}.")
 
 
+def push_to_cloud():
+    ask = console.input("Push to cloud? (Y/n) ")
+    if ask.lower() != 'y':
+        return
+
+    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    os.system("git add static/data.js")
+    os.system(f"git commit -m 'Update data.js at {now}'")
+    os.system("git push origin master")
+    console.print("[bold green]Pushed to cloud.")
+
+
 if __name__ == "__main__":
     write_file()
+    push_to_cloud()
