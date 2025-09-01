@@ -25,7 +25,7 @@
             <div class="space-y-4">
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">加密密码</label>
-                    <input v-model="password" type="password" id="password"
+                    <input v-model="password" type="password" id="password" @keyup.enter="decrypt"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="输入加密时使用的密码">
                 </div>
@@ -184,7 +184,11 @@
                 },
                 doSearch(text) {
                     this.filteredItems = this.fullItems.filter(item => {
-                        return item.名称.includes(text) || item.位置.includes(text) || item.标签.includes(text) || item.备注.includes(text);
+                        return item.ID == text
+                            || item.名称.includes(text) 
+                            || item.位置.includes(text) 
+                            || item.标签.includes(text) 
+                            || item.备注.includes(text);
                     });
                     this.showAllData();
                 },
