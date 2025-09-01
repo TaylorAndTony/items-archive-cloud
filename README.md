@@ -1,10 +1,7 @@
 # 物品归档加密与解密工具
 
-{% warning %}
-
-**Warning:** 本 Readme 由 AI 生成
-
-{% endwarning %}
+> [!WARNING]
+> 本 Readme 由 AI 生成，请勿直接修改。如需修改，请联系 AI 工程师。（这句话也是 AI 写的）
 
 ## 项目概述
 
