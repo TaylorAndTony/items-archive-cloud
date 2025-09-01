@@ -51,13 +51,19 @@ def write_file():
 
 
 def push_to_cloud():
-    ask = console.input("Push to cloud? (Y/n) ")
+    ask = console.input("Commit to local git repository? (y/n) ")
     if ask.lower() != 'y':
         return
 
     now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     os.system("git add static/data.js")
-    os.system(f"git commit -m 'Update data.js at {now}'")
+    os.system(f'git commit -m "Update data.js at {now}"')
+    console.print("[bold green]Committed to local git repository.")
+    
+    ask = console.input("Push to origin? (y/n) ")
+    if ask.lower() != 'y':
+        return
+    
     os.system("git push origin master")
     console.print("[bold green]Pushed to cloud.")
 
@@ -65,3 +71,4 @@ def push_to_cloud():
 if __name__ == "__main__":
     write_file()
     push_to_cloud()
+    os.system("pause")
