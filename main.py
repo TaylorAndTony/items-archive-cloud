@@ -27,7 +27,7 @@ def string_contains_list_any(string, lst) -> bool:
 
 
 def write_file():
-    with open(csv_file, 'r', encoding='utf-8') as f:
+    with open(csv_file, 'r', encoding='utf-8-sig') as f:
         plaintext = f.read()
 
     lines = plaintext.split('\n')
