@@ -57,7 +57,7 @@
 
                 <div>
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">搜索</label>
-                    <input v-model="search" type="text" id="search"
+                    <input v-model="search" type="text" id="search" @keyup.enter="doSearch"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="搜索内容">
                 </div>
@@ -173,7 +173,6 @@
                             + '。请检查密码是否正确。';
                         return;
                     }
-                    console.log(parsed.data);
                     this.fullItems = parsed.data;
                     this.filteredItems = parsed.data;
                     this.displayedItems = parsed.data;
@@ -182,7 +181,8 @@
                     console.log(this.fullItems[0]);
                     window.debugItem = this.fullItems[0];
                 },
-                doSearch(text) {
+                doSearch() {
+                    let text = this.search
                     this.filteredItems = this.fullItems.filter(item => {
                         return item.ID == text
                             || item.名称.includes(text) 
@@ -190,9 +190,12 @@
                             || item.标签.includes(text) 
                             || item.备注.includes(text);
                     });
-                    this.showAllData();
+                    this.showAllData(1);  // set page to 1
                 },
-                showAllData() {
+                showAllData(setPage=-1) {
+                    if (setPage > 0) {
+                        this.pagination.page = setPage;
+                    }
                     // pagination
                     let perPage = this.pagination.perPage;
                     let total = this.filteredItems.length;
@@ -218,7 +221,7 @@
                     if (newVal.length > 0) {
                         this.doSearch(newVal);
                     } else {
-                        this.showAllData(window.parsedData);
+                        this.showAllData();
                     }
                 },
             },
