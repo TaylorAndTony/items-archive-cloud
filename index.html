@@ -16,24 +16,50 @@
 
     <script src="./static/data.js"></script>
 
+    <link rel="stylesheet" href="./static/style.css">
+
+    <meta name="color-scheme" content="light dark">
+
+    <!-- favicon -->
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                },
+                fontFamily: {
+                    din: ['DIN', 'Helvetica', 'Arial', 'sans-serif'],
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        .my-btn {
+            @apply bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-200
+                    dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:text-gray-100;
+        }
+        .my-input {
+            @apply px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+        }
+    </style>
+
 </head>
 
-<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+<body class="bg-gray-100 min-h-screen p-4 md:p-8 dark:bg-gray-800 dark:text-white">
     <div id="app">
-        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 md:p-8">
+        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg shadow-md p-6 md:p-8">
 
             <div class="space-y-4">
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">加密密码</label>
-                    <input v-model="password" type="password" id="password" @keyup.enter="decrypt"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">加密密码</label>
+                    <input v-model="password" type="password" id="password" @keyup.enter="decrypt" class="my-input w-full "
                         placeholder="输入加密时使用的密码">
                 </div>
 
 
-                <button id="decryptBtn"
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-200"
-                    @click="decrypt">
+                <button id="decryptBtn" class="w-full my-btn" @click="decrypt">
                     <i class="fa fa-key mr-1"></i>解密
                 </button>
 
@@ -41,36 +67,33 @@
                     第
                     <input v-model="pagination.page" type="number" min="1" max="{{ pagination.pages }}"
                         @change="showAllData"
-                        class="w-20 text-center bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="my-input w-20">
                     页 / 共{{ pagination.pages }}页
-                    <button id="prevBtn"
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-200"
-                        :disabled="pagination.page == 1" @click="prev">
+                    <button id="prevBtn" class="my-btn" :disabled="pagination.page == 1" @click="prev">
                         <i class="fa fa-angle-left mr-1"></i>上一页
                     </button>
-                    <button id="nextBtn"
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-200"
-                        :disabled="pagination.page == pagination.pages" @click="next">
+                    <button id="nextBtn" class="my-btn" :disabled="pagination.page == pagination.pages" @click="next">
                         下一页<i class="fa fa-angle-right ml-1"></i>
                     </button>
                 </div>
 
                 <div>
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">搜索</label>
-                    <input v-model="search" type="text" id="search" @keyup.enter="doSearch"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <input v-model="search" type="text" id="search" @keyup.enter="doSearch" class="my-input w-full "
                         placeholder="搜索内容">
                 </div>
 
                 <div id="error" class="mt-4" v-if="errorMessage">
-                    <div class="p-3 bg-red-50 rounded-md border border-red-200 text-red-600 text-sm">
+                    <div class="p-3 bg-red-50 rounded-md border border-red-200 text-red-600 text-sm
+                        dark:bg-red-900 dark:text-red-100">
                         <i class="fa fa-exclamation-circle mr-1"></i>
                         <span id="errorMessage">{{ errorMessage }}</span>
                     </div>
                 </div>
 
                 <div id="warn" class="mt-4" v-if="warnMessage">
-                    <div class="p-3 bg-yellow-50 rounded-md border border-yellow-200 tex-yellow-600 text-sm">
+                    <div class="p-3 bg-yellow-50 rounded-md border border-yellow-200 tex-yellow-600 text-sm
+                        dark:bg-yellow-800 dark:text-yellow-100">
                         <i class="fa fa-exclamation-circle mr-1"></i>
                         <span id="warnMessage">{{ warnMessage }}</span>
                     </div>
@@ -80,20 +103,24 @@
         </div>
 
         <div class="mx-auto max-w-screen-xl">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                <div v-for="item in displayedItems" :key="item.ID" class="bg-white rounded-lg shadow-md p-6 md:p-8">
-                    <div class="flex flex-row justify-start items-center">
-                        <div class="text-2xl font-mono font-bold text-white bg-blue-500 rounded-md p-1 mr-2">{{ item.ID }}</div>
-                        <div class="text-xl font-bold">{{ item.名称 }}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-4">
+                <div v-for="item in displayedItems" :key="item.ID" 
+                        class="bg-white rounded-lg shadow-md p-4
+                                dark:bg-gray-700 dark:text-white">
+                    <div class="flex flex-row justify-start items-start">
+                        <div class="shrink-0 text-2xl font-din text-white bg-blue-500 rounded-md w-20 mr-2 text-center dark:bg-emerald-600">{{
+                            item.ID }}</div>
+                        <div class="text-xl">{{ item.名称 }}</div>
                     </div>
-                    <div class="text-blue-600 font-bold">{{ item.位置 }}</div>
+                    <div v-if="item.位置" class="text-blue-600 text-lg dark:text-teal-200 my-1">{{ item.位置 }}</div>
+                    <div v-if="!item.位置" class="text-red-500 text-lg dark:text-red-300 my-1">无位置记录</div>
                     <div>
                         <span>标签：</span>
-                        <span class="text-indigo-600">{{ item.标签 }}</span>
+                        <span class="text-indigo-600 dark:text-amber-200">{{ item.标签 }}</span>
                     </div>
                     <div>
                         <span>备注：</span>
-                        <span class="text-neutral-700">{{ item.备注 }}</span>
+                        <span class="text-neutral-700 dark:text-gray-300">{{ item.备注 }}</span>
                     </div>
                 </div>
             </div>
@@ -128,6 +155,12 @@
 
             return decrypted.toString(CryptoJS.enc.Utf8);
         }
+
+        const debugItem = { "ID": "1", "名称": "测试项1", "可查号": "2-e-2021-09-01-667", "位置": "桌子旁边", "价值": "1299", "修改日期": "2024/08/13", "漫游情况": "随身", "标签": "电子", "备注": "123" };
+        const debugItem2 = { "ID": "2", "名称": "测试项12", "可查号": "2-e-2021-09-01-667", "位置": "", "价值": "1299", "修改日期": "2024/08/13", "漫游情况": "随身", "标签": "电子", "备注": "123" };
+        const debugItem3 = { "ID": "3", "名称": "测试项13 带有一个超级长 长长长长长长长长长的名字", "可查号": "2-e-2021-09-01-667", "位置": "", "价值": "1299", "修改日期": "2024/08/13", "漫游情况": "随身", "标签": "电子", "备注": "" };
+        const debugItems = [debugItem, debugItem2, debugItem3];
+
 
         const app = new Vue({
             el: '#app',
@@ -173,6 +206,8 @@
                             + '。请检查密码是否正确。';
                         return;
                     }
+                    this.warnMessage = '';
+                    this.errorMessage = '';
                     this.fullItems = parsed.data;
                     this.filteredItems = parsed.data;
                     this.displayedItems = parsed.data;
@@ -185,14 +220,14 @@
                     let text = this.search
                     this.filteredItems = this.fullItems.filter(item => {
                         return item.ID == text
-                            || item.名称.includes(text) 
-                            || item.位置.includes(text) 
-                            || item.标签.includes(text) 
+                            || item.名称.includes(text)
+                            || item.位置.includes(text)
+                            || item.标签.includes(text)
                             || item.备注.includes(text);
                     });
                     this.showAllData(1);  // set page to 1
                 },
-                showAllData(setPage=-1) {
+                showAllData(setPage = -1) {
                     if (setPage > 0) {
                         this.pagination.page = setPage;
                     }
@@ -229,6 +264,11 @@
                 if (!window.data) {
                     this.errorMessage = '数据加载失败，data 变量不可用，请检查网络';
                     return;
+                }
+                if (window.location.href.indexOf('127.0.0.1') !== -1) {
+                    this.displayedItems = debugItems;
+                    this.warnMessage = '当前为本地调试模式，显示测试数据';
+                    this.errorMessage = '当前为本地调试模式，显示测试数据';
                 }
             },
         });

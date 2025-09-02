@@ -1,0 +1,12 @@
+/* 定义自定义字体 */
+@font-face {
+    /* 为字体指定一个名称，将在CSS中使用 */
+    font-family: 'din';
+    /* 字体文件路径，根据实际存放位置修改 */
+    src: url('./DIN-Medium.otf') format('opentype');
+    /* 字体样式和粗细 */
+    font-style: normal;
+    font-weight: 400;
+    /* 确保字体平滑显示 */
+    font-display: swap;
+}
